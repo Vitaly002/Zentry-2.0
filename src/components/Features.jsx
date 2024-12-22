@@ -3,7 +3,7 @@ import { TiLocationArrow } from "react-icons/ti";
 
 const BentoTilt = ({children, className = ''}) => {
     const [transformStyle, setTransformStyle] = useState('');
-    const itemRef = useRef();
+    const itemRef = useRef(null);
 
     // Executed once mouse is moved on top of that element
     const handleMouseMove = (e) => {
@@ -11,7 +11,7 @@ const BentoTilt = ({children, className = ''}) => {
         if (!itemRef.current) return;
         // Get the properties of the position of the card
         const { left, top, width, height } =
-        itemRef.current.getBoundingClientRect();
+            itemRef.current.getBoundingClientRect();
         // Relative position of the mouse to the position of the card
         const relativeX = (e.clientX - left) / width;
         const relativeY = (e.clientY - top) / height;
@@ -36,6 +36,23 @@ const BentoTilt = ({children, className = ''}) => {
 }
 
 const BentoCard = ({src, title, description, isComingSoon}) => {
+    const [cursorPosition, setCursorPosition] = useState({x: 0, y: 0});
+    const [hoverOpacity, setHoverOpacity] = useState(0);
+    const hoverButtonRef = useRef(null);
+
+    const handleMouseMove = (e) => {
+        if(!hoverButtonRef.current) return;
+        const rect = hoverButtonRef.current.getBoundingClientRect();
+
+        setCursorPosition({
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+        });
+    };
+
+    const handleMouseEnter = () => setHoverOpacity(1);
+    const handleMouseLeave = () => setHoverOpacity(0);
+
     return (
         <div className='relative size-full'>
             <video 
@@ -52,6 +69,22 @@ const BentoCard = ({src, title, description, isComingSoon}) => {
                         <p className='mt-3 max-w-64 text-xs md:text-base'>{description}</p>
                     )}
                 </div>
+
+                {isComingSoon && (
+                    <div ref={hoverButtonRef} onMouseMove={handleMouseMove} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}
+                        className='border-hsla relative flex w-fit cursor-pointer items-center gap-1 overflow-hidden rounded-full bg-black px-5 py-2 text-xs uppercase text-white/20'>
+                        {/* Radial gradient hover effect */}
+                        <div 
+                            className='pointer-events-none absolute -inset-px opacity-0 transition duration-300'
+                            style={{
+                                opacity: hoverOpacity,
+                                background: `radial-gradient(100px circle at ${cursorPosition.x}px ${cursorPosition.y}px, #656FE288, #00000026)`,
+                            }}
+                        />
+                        <TiLocationArrow className='relative z-20'/>
+                        <p className='relative z-20'>Coming soon</p>
+                    </div>
+                )}
             </div>
         </div>
     )
@@ -59,7 +92,7 @@ const BentoCard = ({src, title, description, isComingSoon}) => {
 
 const Features = () => {
   return (
-    <section className='bg-black pb-52'>
+    <section id='vault' className='bg-black pb-52'>
         <div className='container mx-auto px-3 md:px-10'>
             <div className='px-5 py-32'>
                 <p className='font-circular-web text-lg text-blue-50'>
